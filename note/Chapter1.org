@@ -1,0 +1,84 @@
+#+TITLE: 数据结构与算法分析-第1章
+#+CATEGORIES: DataStructure
+#+DESCRIPTION: 数据结构学习笔记
+#+KEYWORDS: DataStructure
+#+DATE: 2018-11-10 22:30
+
+* 第1章-引论
+** 数学知识复习
+*** 指数
+- $X^AX^B=X^{A+B}$
+- $\frac{X^A}{X^B}=X^{A-B}$
+- $(X^A)^B=X^{AB}$
+- $X^N+X^N=2X^N \ne x^{2n}$
+- $2^n+2^n=2^{n+1}$
+
+*** 对数
+- 在计算机科学中,除非有特别声明,所有的对数都是以2为底的.
+- 定义: $x^a=b$ ,当且仅当 $\log_xb=a$,得
+  - $log_AB=\frac{\log_cB}{\log_cA}$;$c>0$
+  - $\log{AB}=\log{A}+\log{B}$
+  - $\log\frac{A}{B}=\log{A} - \log{B}$
+  - $\log(A^B)=B\log{A}$
+  - $\log{X}<X$(对所有X>0成立.)
+  - $\log1 = 0$,$\log2=1$,$\log1024=10$,$\log1048576=20$.
+
+*** 级数
+- $\sum_{i=0}^N2^i=2^{N+1}-1$,等比数列求和公式
+- $\sum_{i=0}^NA^i=\frac{A^{N+1}-1}{A-1}$
+  - 如果 $0<A<1$,N趋近于 $\infty$ 时候, 则 $\sum_{i=0}^NA^i\leq\frac{1}{1-A}$.
+- 分析中另一种常用类型的级数是算术级数.任何这样的级数都可以通过基本公式计算其值.
+  - $\sum_{i=1}^Ni=\frac{N(N+1)}{2}\approx\frac{N^2}{2}$
+- $\sum_{i=1}^Ni^2=\frac{N(N+1)(2N+1)}{6}\approx\frac{N^3}{3}$ 
+- $\sum_{i=1}^Ni^k\approx\frac{N^{k+1}}{|k+1|}$, $k \neq -1$
+- 调和数: $H_N=\sum_{i=1}^N\frac{1}{i}\approx\log_eN$,其和叫做调和和.
+
+*** 模运算
+- 如果N整除 $A-B$, 那么我们就说A与B模N同余(congrument),记为 $A\equiv B(mod N)$.
+  - $81 \equiv 61 \equiv 1(mod 10)$
+- 如果$A\equiv B(mod N)$, 则 $A+C\equiv B+C(mod N)$ 以及$AD\equiv BD(mod N)$
+  
+*** 证明方法
+1. 归纳法进行证明有两个标准部分
+   - 第一步是证明基准情形(base case),就是确定定理对于某个(某些)小的(通常是退化)值的正确性.
+   - 第二步是进行归纳假设.一般来说假设定理对某个有限数k的所有情况都成立,则定理对下一个值(通常是k+1)也从成立.
+
+2. 反证法证明: 假设定理不成立,然后证明该假设倒置某个已知的性质不成立,从而说明原假设是错误的.
+
+** 递归简论
+- 递归的两个基本法则
+  - 基本情形(base case)
+  - 不断推进(making process)
+- 递归的四条基本原则
+  - 基准情形
+  - 不断推进
+  - 设计法则: 假设所有的递归调用都能运行.
+  - 合成效益法(compound interest rule),在求解一个问题的同一个实例时,切勿在不同的递归调用中做重复性的工作.
+
+* 练习题
+** 1.5 证明下列公式:
+1. $\log{X} < X$ 对所有的 $X>0$ 成立.
+#+BEGIN_VERSE
+归纳基础: 当 0<X \le 1 时, 因为X=1/2时, log1/2=-1<1. X=1时, log1=0<1. X为负数时, logX的值不存在.所以 0<X \le 1时, logX < X成立.
+
+归纳假设: 假设命题对任意正数p(p \ge 1), p \le X \le 2p时候命题成立,求证对于任意正整数p, 2p \le X \le 4p 命题成立.
+设Y=2X, logY = log(2*Y/2) = log2 + log(Y/2) = 1 + log X, 又因为 log X < X, 则 logY = log X + 1 < X + 1.
+所以对于任意正整数p, 2p \le X \le 4p 时, 命题 logX < X 成立.
+#+END_VERSE
+
+2. $\log(A^B)=BlogA$
+#+BEGIN_VERSE
+令X=logA, 2^X=A. 令Y=log(A^B), 2^Y = A^B.
+所以 2^Y = A^B = 2^X^B, 所以BX=Y.
+又因为 X=logA,Y=log(A^B)
+所以 log(A^B)=BlogA
+#+END_VERSE
+
+** 1.6 求下列各和
+1. $\sum_{i=0}^{\infty}\frac{1}{4^i} = \frac{1(1-\frac{1}{4}^n)}{1-\frac{1}{4}}=\frac{4}{3}(1-\frac{1}{4}^n)\approx\frac{4}{3}$
+2. $\sum_{i=0}^{\infty}\frac{i}{4^i}$
+   - $S=0+\frac{1}{4}+\frac{2}{4^2}+\frac{3}{4^3}\ldots+\frac{i}{4^i}$
+   - $4S=0+1+\frac{2}{4}+\frac{3}{4^2}+\frac{4}{4^3}\ldots+\frac{i+1}{4^i}$
+   - $3S=1+\frac{1}{4}+\frac{2}{4^2}+\frac{3}{4^3}\ldots+\frac{i}{4^i}=1+\frac{\frac{1}{4}(1-\frac{1}{4^i})}{1-\frac{1}{4}},i\to\infty$
+   - $S\approx\frac{4}{9}$
+     
