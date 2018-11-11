@@ -1,0 +1,217 @@
+#+TITLE: 数据结构与算法分析-第2章
+#+CATEGORIES: DataStructure
+#+DESCRIPTION: 数据结构学习笔记
+#+KEYWORDS: DataStructure
+#+DATE: 2018-11-11 16:45
+
+* 第2章-算法分析
+
+** 数学基础
+- 四个定义
+  - 如果存在正整数 $c$ 和 $n_0$ 使得当 $N\ge n_0$ 时 $T(N) \le cf(N)$ , 则记为 $T(N) = O(f(N))$.上界的定义,大O记法.$T(N)$ 的增长率小于等于 $f(N)$ 的增长率.
+  - 如果存在正整数 $c$ 和 $n_0$ 使得当 $N\ge n_0$ 时 $T(N) \ge cg(N)$ , 则记为 $T(N) = \Omega(f(N))$.下界的定义,$T(N)$ 的增长率大于等于 $g(N)$ 的增长率.
+  - $T(N)=\Theta(h(N))$ 当且仅当 $T(N)=O(h(N))$ 且 $T(N) = \Omega(h(N))$.$T(N)$ 的增长率等于 $h(N)$ 的增长率.
+  - 如果 $T(N)=O(p(N))$ 且 $T(N)\neq\Theta(p(N))$ ,则 $T(N)=o(p(N))$ .小o记法. $T(N)$ 的增长率小于 $p(N)$ 的增长率.大O包含增长率相同的可能性.
+
+- 法则1: 如果 $T_1(N)=O(f(N))$ 且 $T_2(N) = O(g(N))$ ,那么
+  - $T_1(N) + T_2(N) = max(O(f(N)), O(g(N)))$
+  - $T_1(N) * T_2(N) = O(f(N) * g(N))$
+- 法则2: 如果 $T(N)$ 是一个k次多项式,则 $T(N) = \Theta(N^k)$.
+- 法则3: 对于任意常数k, $\log^kN=O(N)$. 它告诉我们对数增长得非常缓慢.
+
+- 典型的增长率
+| 函数   | 名称       |
+|--------+------------|
+| c      | 常数       |
+| logN   | 对数级     |
+| log^2N | 对数平方根 |
+| N      | 线性级     |
+| NlogN  |            |
+| N^2    | 平方级     |
+| N^3    | 立方级     |
+| 2^N    | 指数级        |
+
+- 可以通过计算极限 $\lim_{n\to\infty}\frac{f(N)}{g(N)}$ 来确定两个函数 $f(N)$ 和 $g(N)$ 的相对增长率.
+  - 洛必达法则: 若 $\lim_{n\to\infty}f(N) = \infty$ 且 $\lim_{n\to\infty}g(N) = \infty$ ,则 $\lim_{n\to\infty}\frac{f(N)}{g(N)} = \lim_{n\to\infty}\frac{f'(N)}{g'(N)}$, $f'(N)$ 和 $g'(N)$ 分别是 $f(N)$ 和 $g(N)$ 的导数.
+  - 极限是 $0$ : 说明 $f(N)=o(g(N))$
+  - 极限是 $c\neq0$ : 说明 $f(N)=\Theta(g(N))$
+  - 极限是 $\infty$ : 说明 $g(N) = o(f(N))$, $f(N)=O(g(N))$.
+  - 极限摆动: 二者无关.
+
+
+** 运行时间
+- 一般法则
+  - 嵌套的for循环内部的一条语句总的运行时间为该语句的运行时间乘以该组所有的for循环的大小的乘积.
+  - 顺序语句将各个语句的运行时间求和即可.
+  - 斐波那契函数递归求法最坏情况的增长率是 $\frac{5}{3}^n$
+
+*** 最大自序列和问题求解
+- 算法1: 时间复杂度为 $O(N^3)$
+#+BEGIN_SRC c
+  int MaxSubsequenceSum1(const int A[], int N) {
+      int ThisSum, MaxSum, i, j, k;
+
+      /* 总开销: O(1*N*N*N)=O(3) */
+      /* 赋值开销是O(1) */
+      MaxSum = 0;
+      /* N次的循环 */
+      for (i = 0; i < N; i++) {
+          /* N-i次循环 */
+          for(j = i; j < N; j++) {
+              ThisSum = 0;
+              /* j-i+1次循环,假设为N次 */
+              for (k = i; k <= j; k++) {
+                  ThisSum += A[k];
+              }
+              if (ThisSum > MaxSum) {
+                  MaxSum = ThisSum;
+              }
+          }
+      }
+      return MaxSum;
+  }
+#+END_SRC
+- 算法2: 时间复杂度为 $O(N^2)$
+#+BEGIN_SRC c
+  int MaxSubsequnceSum2(const int A[], int N) {
+      int ThisSum, MaxSum, i, j;
+
+      MaxSum = 0;
+      /* N次循环 */
+      for(i = 0; i < N; i++) {
+          ThisSum = 0;
+          /* N-i次循环 */
+          for(j = i; j < N; j++) {
+              ThisSum += A[j];
+
+              if (ThisSum > MaxSum) {
+                  MaxSum = ThisSum;
+              }
+          }
+      }
+      return MaxSum;
+  }
+#+END_SRC
+- 算法3: 时间复杂度为 $O(NlogN)$
+#+BEGIN_SRC c
+  static int MaxSubsequenceSum3(const int A[], int Left, int Right) {
+      int MaxLeftSum, MaxRightSum;
+      int MaxLeftBorderSum, MaxRightBorderSum;
+      int LeftBorderSum, RightBorderSum;
+      int Center, i;
+
+      /* Base Case */
+      if (Left == Right) {
+          if (A[Left] > 0) {
+              return A[Left];
+          } else {
+              return 0;
+          }
+      }
+
+      Center = (Left + Right) / 2;
+      MaxLeftSum = MaxSubsequenceSum3(A, Left, Right);
+      MaxRightSum = MaxSubsequenceSum3(A, Left, Right);
+
+      MaxLeftBorderSum = 0;
+      LeftBorderSum = 0;
+      for (i = Center; i >= Left; i--) {
+          LeftBorderSum += A[i];
+          if (LeftBorderSum > MaxLeftBorderSum) {
+              MaxLeftBorderSum = LeftBorderSum;
+          }
+      }
+
+      MaxRightBorderSum = 0;
+      RightBorderSum = 0;
+      for (i = Center + 1; i <= Right; i++) {
+          RightBorderSum += A[i];
+          if (RightBorderSum > MaxRightBorderSum) {
+              MaxRightBorderSum = RightBorderSum;
+          }
+      }
+
+      return Max3(MaxLeftSum, MaxRightSum, MaxLeftBorderSum + MaxRightBorderSum);
+  }
+
+  int Max(int first, int second, int third) {
+      return first > second ?
+          (first > third ? first : third) :
+          (second > third ? second : third);
+  }
+#+END_SRC
+- 算法4: 时间复杂度为 $O(N)$ 
+#+BEGIN_SRC c
+int MaxSubsequenceSum(const int A[], int N) {
+    int ThisSum, MaxSum, j;
+    ThisSum = MaxSum = 0;
+
+    for (j = 0; j < N; j++) {
+        ThisSum += A[j];
+
+        if (ThisSum > MaxSum) {
+            MaxSum = ThisSum;
+        } else if (ThisSum < 0) {
+            ThisSum = 0;
+        }
+    }
+    return MaxSum;
+}
+#+END_SRC
+
+*** 运行时间中的对数
+- 对数最常出现的规律的一般法则:
+  - 如果一个算法用常数时间 $O(1)$ 将问题的大小削减为其一部分(通常是 $\frac{1}{2}$ ), 那么该算法就是 $O(\log{N})$ .
+  - 另一方面,使用常数时间只是把问题减少一个时间常数(如将问题减少 $1$ ), 那么该算法就是 $O(N)$ 的.
+
+- 对分查找: 时间复杂度为 $O(N)$
+#+BEGIN_SRC c
+  int BinarySearch(const int A[], int X, int N) {
+      int Low, Mid, High;
+
+      Low = 0;
+      High = N - 1;
+
+      while (Low <= High) {
+          Mid = (Low + High) / 2;
+          if (A[Mid] < X) {
+              Low = Mid + 1;
+          } else if (A[Mid] > X){
+              High = Mid - 1;
+          } else {
+              return Mid;
+          }
+      }
+      return -1;
+  }
+#+END_SRC
+- 最大公因数的欧几里得算法: 时间复杂度为 $O(\log{N})$
+#+BEGIN_SRC c
+  unsigned int Gcd(unsigned int M, unsigned int N) {
+      unsigned int Rem;
+
+      while (N > 0) {
+          Rem = M % N;
+          M = N;
+          N = Rem;
+      }
+      return M;
+  }
+#+END_SRC
+
+- 定理: 如果 $M > N$ ,则 $M mod N < \frac{M}{2}$
+
+- 幂运算: 时间复杂度为 $O(\log{N})$
+#+BEGIN_SRC c
+  long int
+  Pow(long int X, unsigned int N) {
+      if (N == 0)
+          return 1;
+      if (N == 1)
+          return X;
+      if (IsEven(N))
+          return Pow(X * X, N / 2);
+      else
+          return Pow(X * X, N/2) * X;
+  }
+#+END_SRC
