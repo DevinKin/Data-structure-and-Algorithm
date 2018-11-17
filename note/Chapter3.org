@@ -1,3 +1,9 @@
+#+TITLE: 数据结构与算法分析-第3章
+#+CATEGORIES: DataStructure
+#+DESCRIPTION: 数据结构学习笔记
+#+KEYWORDS: DataStructure
+#+DATE: 2018-11-17 11:45
+
 * 第3章-表,栈和队列
 ** 抽象数据类型
 - 抽象数据类型(abstract data type, ADT)是一些操作集合.抽象数据类型是数学的抽象
