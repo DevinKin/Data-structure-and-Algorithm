@@ -1,0 +1,987 @@
+* 第3章-表,栈和队列
+** 抽象数据类型
+- 抽象数据类型(abstract data type, ADT)是一些操作集合.抽象数据类型是数学的抽象
+
+** 表ADT
+*** 链表的实现
+- linkedlist.h
+#+BEGIN_SRC c
+  #ifndef _LIST_H
+  #define _LIST_H
+  struct Node;
+  typedef struct Node* PtrToNode;
+  typedef PtrToNode List;
+  typedef PtrToNode Position;
+
+  List MakeEmpty();
+  int IsEmpty(List L);
+  int IsLast(Position P, List L);
+  Position Find(int X, List L);
+  void Delete(int X, List L);
+  Position FindPrevious(int X, List L);
+  void Insert(int X, List L, Position P);
+  void DeleteList(List L);
+  Position Header(List L);
+  Position First(List L);
+  Position Advance(Position P);
+  int Reetireve(Position P);
+  void printLinkedList(List L);
+  void fromArray(List L, int[], int);
+
+  #endif
+
+  /* Place in the implementation file  */
+  struct Node
+  {
+      int Element;
+      Position Next;
+  };
+#+END_SRC
+
+- linkedlist.c
+#+BEGIN_SRC c
+  #include "linkedlist.h"
+  #include <stdio.h>
+  #include <stdlib.h>
+
+  /* Return true if L is empty */
+  int
+  IsEmpty(List L) {
+      return L->Next == NULL;
+  }
+
+  List
+  MakeEmpty() {
+      List emptylist;
+
+      emptylist = malloc(sizeof(struct Node));
+
+      if (emptylist == NULL) {
+          perror("out of memory");
+      }
+
+      return emptylist;
+  }
+
+  /* Return true if P is the last position in list i */
+  /* Parameter L is unused in this implementation */
+  int
+  IsLast(Position P, List L) {
+      return P->Next == NULL;
+  }
+
+  /* Return Position of X in L; NULL if not found */
+  Position
+  Find(int X, List L) {
+      Position P;
+
+      P = L->Next;
+
+      while (P != NULL && P->Element != X) {
+          P = P->Next;
+      }
+
+      return P;
+  }
+
+
+  /* Delete first occurrence of X from a list */
+  /* Assume use of a header Node */
+  void
+  Delete(int X, List L) {
+      Position P, TmpCell;
+      P = FindPrevious(X, L);
+
+      /* Assumption of header use */
+      /* X is found; delete it */
+      if (!IsLast(P, L)) {
+          TmpCell = P->Next;
+          /* Bypass deleted cell */
+          P->Next = TmpCell->Next;
+          free(TmpCell);
+      }
+  }
+
+
+  /* If X is not found, then Next field of returned */
+  /* Position is NULL */
+  /* Assume a header */
+  Position
+  FindPrevious(int X, List L) {
+      Position P;
+      P = L;
+      while(P->Next != NULL && P->Next->Element != X) {
+          P = P->Next;
+      }
+      return P;
+  }
+
+
+  /* Insert (after legal position P) */
+  /* Header implementation assumed */
+  /* Parameter L is unused in this implementation */
+  void
+  Insert(int X, List L, Position P) {
+      Position TmpCell;
+
+      TmpCell = malloc(sizeof(struct Node));
+      if (TmpCell == NULL) {
+          perror("Out of space!!!");
+      }
+
+      TmpCell->Element = X;
+      TmpCell->Next = P->Next;
+      P->Next = TmpCell;
+  }
+
+
+  /* Correct DeleteList algorithm */
+  void
+  DeleteList(List L) {
+      Position P, Tmp;
+
+      /* Header assumed */
+      P = L->Next;
+      L->Next = NULL;
+      while(P != NULL) {
+          Tmp = P->Next;
+          // after free P we can't use P
+          free(P);
+          P = Tmp;
+      }
+  }
+
+
+  Position
+  Header(List L) {
+      return L;
+  }
+
+  Position
+  First(List L) {
+      return L->Next;
+  }
+
+  Position
+  Advance(Position P) {
+      return P->Next;
+  }
+
+  int Retrieve(Position P) {
+      return P->Element;
+  }
+
+
+  void
+  printLinkedList(List L) {
+      // skip header
+      Position P = L->Next;
+      printf("[ ");
+      while (P != NULL) {
+          printf("%d ", P->Element);
+          P = P->Next;
+      }
+      printf("]\n");
+  }
+
+
+  void
+  fromArray(List L, int args[], int size) {
+      if (L == NULL) {
+          L = MakeEmpty();
+      }
+      Position P = L;
+      Position tmp;
+      for (int i = 0; i < size; i++) {
+          tmp = malloc(sizeof(struct Node));
+          if (tmp == NULL) {
+              perror("out of memory");
+          }
+          tmp->Element = args[i];
+          P->Next = tmp;
+          P = P->Next;
+      }
+  }
+#+END_SRC
+*** 多项式ADT
+- polynomial.h
+#+BEGIN_SRC c
+  #ifndef _POLYNOMIAL_H
+  #define _POLYNOMIAL_H
+
+  #define  MaxDegree 1000
+
+  /* array way */
+  typedef struct {
+      int CoeffArray[MaxDegree + 1];
+      int HighPower;
+  } * Polynomial;
+
+
+  typedef struct Node *PtrToNode;
+
+  struct Node {
+      int Cofficient;
+      int Exponent;
+      PtrToNode Next;
+  };
+
+  /* Nodes sorted by exponent */
+  /* typedef PtrToNode Polynomial; */
+
+  void
+  ZeroPolynomial(Polynomial Poly);
+
+  void
+  AddPolynomial(const Polynomial Poly1, const Polynomial Poly2, Polynomial PolySum);
+
+
+  void
+  MultPolynomial(const Polynomial Poly1, const Polynomial Poly2, Polynomial PolyProd);
+
+  #endif
+
+#+END_SRC
+
+- polynomial.c
+#+BEGIN_SRC c
+  #include "polynomial.h"
+  #include "utils.h"
+  #include <stdio.h>
+
+  void ZeroPolynomial(Polynomial poly) {
+      for(int i = 0; i < MaxDegree; i++) {
+          poly->CoeffArray[i] = 0;
+      }
+      poly->HighPower = 0;
+  }
+
+  void
+  AddPolynomial(const Polynomial Poly1,
+                const Polynomial Poly2, const Polynomial PolySum) {
+      int i;
+      ZeroPolynomial(PolySum);
+      PolySum->HighPower = Max(Poly1->HighPower, Poly2->HighPower);
+
+      for(i = PolySum->HighPower; i >= 0; i--) {
+          PolySum->CoeffArray[i] = Poly1->CoeffArray[i] + Poly2->CoeffArray[i];
+      }
+  }
+
+  void
+  MultPolynomial(const Polynomial Poly1,
+                 const Polynomial Poly2, const Polynomial PolyProd) {
+      int i, j;
+      ZeroPolynomial(PolyProd);
+      PolyProd->HighPower = Poly1->HighPower + Poly2->HighPower;
+
+      if (PolyProd->HighPower > MaxDegree) {
+          perror("Exceeded array size");
+      } else {
+          for (int i = 0; i <= Poly1->HighPower; i++) {
+              for (int j = 0; j <= Poly2->HighPower; j++) {
+                  PolyProd->CoeffArray[i + j] +=
+                      Poly1->CoeffArray[i] *
+                      Poly2->CoeffArray[j];
+              }
+          }
+      }
+  }
+#+END_SRC
+
+*** 游标实现
+- 游标有一个全局的结构体数组, 数组下标用来代表一个地址.
+- 使用数组来模拟malloc和free.
+- 数组0索引管理着链表的空闲内存.
+- 没有可用空间,将P置为0实现.
+
+- cursor.h
+#+BEGIN_SRC c
+  #ifndef _CURSOR_H
+  #define _CURSOR_H
+
+  #define SpaceSize 13
+
+  typedef int PtrToNode;
+  typedef PtrToNode List;
+  typedef PtrToNode Position;
+  typedef int ElementType;
+
+  void InitializeCursorSpace(void);
+
+  List MakeEmpty(List L);
+  int IsEmpty(const List L);
+  int IsLast(const Position P, const List L);
+  Position Find(ElementType X, List L);
+  void Delete(ElementType X, List L);
+  Position FindPrevious(ElementType X, const List L);
+  void Insert(ElementType X, List L, Position P);
+  void DeleteList(List L);
+  Position Header(const List L);
+  Position First(const List L);
+  Position Advance(const Position P);
+  ElementType Retireve(const Position P);
+  List FromArray(int[], int);
+  void PrintCursorList(List);
+
+  struct Node {
+      ElementType Element;
+      Position Next;
+  };
+
+  #endif
+
+
+
+#+END_SRC
+
+- cursor.c
+#+BEGIN_SRC c
+  #include "cursor.h"
+  #include <stdio.h>
+
+  /* Place in implementation file */
+
+  struct Node CursorSpace[SpaceSize];
+
+
+  static Position
+  CursorAlloc(void) {
+      Position P;
+
+      P = CursorSpace[0].Next;
+      CursorSpace[0].Next = CursorSpace[P].Next;
+
+      return P;
+  }
+
+  static void
+  CursorFree(Position P) {
+      CursorSpace[P].Next = CursorSpace[0].Next;
+      CursorSpace[0].Next = P;
+  }
+
+  void
+  InitializeCursorSpace(void) {
+      for (int i = 0; i < SpaceSize - 1; i++) {
+          CursorSpace[i].Next = i + 1;
+      }
+      CursorSpace[SpaceSize - 1].Next = 0;
+  }
+
+
+  List
+  MakeEmpty(List L) {
+      if (IsEmpty(L)) {
+          return L;
+      }
+
+      Position p = CursorSpace[L].Next;
+      Position tmp;
+      while(p) {
+          tmp = p;
+          p = CursorSpace[p].Next;
+          CursorFree(tmp);
+      }
+      return L;
+  }
+
+
+  /* Return true if L is empty */
+  int
+  IsEmpty(List L) {
+      return CursorSpace[L].Next == 0;
+  }
+
+  /* Return true if P is the last position in list l */
+  /* Parameter L is unused in this implementation */
+  int
+  IsLast(Position P, List L) {
+      return CursorSpace[P].Next == 0;
+  }
+
+  /* Return Position of X in L; 0 if not found */
+  /* Uses a header node */
+  Position
+  Find(ElementType X, List L) {
+      Position P;
+      P = CursorSpace[L].Next;
+      while (P && CursorSpace[P].Element != X) {
+          P = CursorSpace[P].Next;
+      }
+      return P;
+  }
+
+
+  /* Delete first occurrence of X from a list */
+  /* Assume use of a header node */
+  void
+  Delete(ElementType X, List L) {
+      Position P, TmpCell;
+
+      P = FindPrevious(X, L);
+
+      /* Assumption of header use */
+      /* X is found; delete it */
+      if (!IsLast(P, L)) {
+          TmpCell = CursorSpace[P].Next;
+          CursorSpace[P].Next = CursorSpace[TmpCell].Next;
+          CursorFree(TmpCell);
+      }
+  }
+
+
+  Position
+  FindPrevious(ElementType X, const List L) {
+      Position p, tmp;
+      tmp = CursorSpace[L].Next;
+      while(tmp && CursorSpace[tmp].Element != X) {
+          // record
+          p = tmp;
+          tmp = CursorSpace[tmp].Next;
+      }
+      return p;
+  }
+
+
+  /* Insert (after legal position P) */
+  /* Header implementation assumed */
+  /* Parameter L is unused in this implementation */
+  void
+  Insert(ElementType X, List L, Position P) {
+      Position TmpCell;
+
+      TmpCell = CursorAlloc();
+      if (TmpCell == 0) {
+          perror("out of memory");
+      }
+      CursorSpace[TmpCell].Element = X;
+      CursorSpace[TmpCell].Next = CursorSpace[P].Next;
+      CursorSpace[P].Next = TmpCell;
+  }
+
+
+  void DeleteList(List L) {
+      List head = MakeEmpty(L);
+      CursorFree(head);
+  }
+
+  Position
+  Header(const List L) {
+      return L;
+  }
+
+  Position
+  First(const List L) {
+      return CursorSpace[L].Next;
+  }
+
+  Position
+  Advance(const Position P) {
+      return CursorSpace[P].Next;
+  }
+
+  ElementType
+  Retireve(const Position P) {
+      return CursorSpace[P].Element;
+  }
+
+  List
+  FromArray(int args[], int size) {
+      List list = CursorAlloc();
+      Position p = list;
+      for (int i = 0; i < size; i++) {
+          Insert(args[i], list, p);
+          p = CursorSpace[p].Next;
+      }
+      CursorSpace[p].Next = 0;
+      return list;
+  }
+
+  void
+  PrintCursorList(List l) {
+      printf("[ ");
+      Position p = CursorSpace[l].Next;
+      while(p) {
+          printf("%d ", CursorSpace[p].Element);
+          p = CursorSpace[p].Next;
+      }
+      printf("]\n");
+  }
+#+END_SRC
+
+** 栈ADT
+- FILO(先进后出)
+- 实现方法
+  - 指针实现
+  - 数组实现
+    
+**** 指针实现
+#+BEGIN_SRC c 
+  #ifndef _STACK_H
+  #define _STACK_H
+
+  struct Node;
+  typedef struct Node *PtrNode;
+  typedef PtrNode Stack;
+  typedef int ElementType;
+
+  int IsEmpty(Stack S);
+  Stack CreateStack(void);
+  void DisposeStack(Stack S);
+  void MakeEmpty(Stack S);
+  void Push(ElementType X, Stack S);
+  ElementType Top(Stack S);
+  void Pop(Stack S);
+
+  #endif
+#+END_SRC
+
+#+BEGIN_SRC c
+  #include "stackwithlist.h"
+  #include <stdio.h>
+  #include <stdlib.h>
+
+  struct Node {
+      ElementType Element;
+      PtrNode Next;
+  };
+
+  int
+  IsEmpty(Stack S) {
+      return S->Next == NULL;
+  }
+
+  Stack CreateStack(void) {
+      Stack S;
+
+      S = malloc(sizeof(struct Node));
+      if (S == NULL) {
+          perror("out of memory");
+      }
+      S->Next = NULL;
+      MakeEmpty(S);
+      return S;
+  }
+
+  void
+  MakeEmpty(Stack S) {
+      if (S == NULL) {
+          perror("Must use CreateStack first");
+      } else {
+          while (!IsEmpty(S)) {
+              Pop(S);
+          }
+      }
+  }
+
+  void
+  Push(ElementType X, Stack S) {
+      PtrNode TmpCell;
+
+      TmpCell = malloc(sizeof(struct Node));
+      if (TmpCell == NULL) {
+          perror("out of memory");
+      } else {
+          TmpCell->Element = X;
+          TmpCell->Next = S->Next;
+          S->Next = TmpCell;
+      }
+  }
+
+  ElementType
+  Top(Stack S) {
+      if (!IsEmpty(S)) {
+          return S->Next->Element;
+      }
+      printf("empty Stack");
+      /* Return value used to avoid warning */
+      return 0;
+  }
+
+  void
+  Pop(Stack S) {
+      PtrNode FirstCell;
+      if (IsEmpty(S)) {
+          perror("Empty Stack");
+      } else {
+          FirstCell = S->Next;
+          S->Next = S->Next->Next;
+          free(FirstCell);
+      }
+  }
+
+  void
+  DisposeStack(Stack S) {
+      MakeEmpty(S);
+      free(S);
+  }
+#+END_SRC
+**** 数组实现
+#+BEGIN_SRC c 
+  #ifndef _STACKWITHARRAY_H
+  #define _STACKWITHARRAY_H
+
+  struct StackRecord;
+  typedef struct StackRecord* Stack;
+  typedef int ElementType;
+
+  int IsEmpty(Stack S);
+  int IsFull(Stack S);
+  Stack CreateStack(int MaxElements);
+  void DisposeStack(Stack S) ;
+  void MakeEmpty(Stack S);
+  void Push(ElementType X, Stack S);
+  ElementType Top(Stack S);
+  void Pop(Stack S);
+  ElementType TopAndPop(Stack S);
+
+  struct StackRecord {
+      int Capacity;
+      int TopOfStack;
+      ElementType *Array;
+  };
+
+  #endif
+#+END_SRC
+
+#+BEGIN_SRC c
+  #include "stackwitharray.h"
+  #include <stdio.h>
+  #include <stdlib.h>
+
+  #define EmptyTOS (-1)
+  #define MinStackSize (5)
+
+
+  Stack
+  CreateStack(int MaxElements) {
+      Stack S;
+
+      if (MaxElements < MinStackSize) {
+          perror("Stack size is too small");
+      }
+
+      S = malloc(sizeof(struct StackRecord));
+      if (S == NULL) {
+          perror("Out of space!!!");
+      }
+
+      S->Array = malloc(sizeof(ElementType) * MaxElements);
+      if (S->Array == NULL) {
+          perror("Out of space!!!");
+      }
+      S->Capacity = MaxElements;
+      MakeEmpty(S);
+      return S;
+  }
+
+  void
+  DisposeStack(Stack S) {
+      if (S != NULL) {
+          free(S->Array);
+          free(S);
+      }
+  }
+
+
+  int
+  IsEmpty(Stack S) {
+      return S->TopOfStack == EmptyTOS;
+  }
+
+  void
+  MakeEmpty(Stack S) {
+      S->TopOfStack = EmptyTOS;
+  }
+
+
+  void
+  Push(ElementType X, Stack S) {
+      if (IsFull(S)) {
+          perror("Full Stack");
+      } else {
+          S->Array[++S->TopOfStack] = X;
+      }
+  }
+
+  int
+  IsFull(Stack S) {
+      return S->TopOfStack == S->Capacity;
+  }
+
+
+  ElementType
+  Top(Stack S) {
+      if (!IsEmpty(S)) {
+          return S->Array[S->TopOfStack];
+      }
+      perror("Empty Stack");
+      /* Return value used to avoid warning */
+      return 0;
+  }
+
+  void
+  Pop(Stack S) {
+      if (IsEmpty(S)) {
+          perror("Empty Stack");
+      } else {
+          S->TopOfStack--;
+      }
+  }
+
+
+  ElementType
+  TopAndPop(Stack S) {
+      if (!IsEmpty(S)) {
+          return S->Array[S->TopOfStack--];
+      }
+      perror("Empty Stack");
+      /* Return value used to avoid warning */
+      return 0;
+  }
+#+END_SRC
+
+** 队列ADT
+- FIFO(先进先出)
+  
+*** 数组实现方式
+- queuewitharray.h
+#+BEGIN_SRC c
+  #ifndef _QUEUEWITHARRAY_H
+  #define _QUEUEWITHARRAY_H
+
+  struct QueueRecord;
+  typedef struct QueueRecord *Queue;
+  typedef int ElementType;
+
+  int IsEmpty(Queue Q);
+  int IsFull(Queue Q);
+  Queue CreateQueue(int MaxElements);
+  void DisposeQueue(Queue Q);
+  void MakeEmpty(Queue Q);
+  void Enqueue(ElementType X, Queue Q);
+  ElementType Front(Queue Q);
+  void Dequeue(Queue Q);
+  ElementType FrontAndDequeue(Queue Q);
+
+  /* Queue implementation is a dynamically allocated array */
+  #define MinQueueSize (5)
+  struct QueueRecord {
+      int Capacity;
+      int Front;
+      int Rear;
+      int Size;
+      ElementType *Array;
+  };
+
+  #endif
+#+END_SRC
+- queuewitharray.c
+#+BEGIN_SRC c
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include "queuewitharray.h"
+
+
+  int
+  IsEmpty(Queue Q) {
+      return Q->Size == 0;
+  }
+
+  int
+  IsFull(Queue Q) {
+      return Q->Size == Q->Capacity;
+  }
+
+  Queue
+  CreateQueue(int MaxElements) {
+      Queue Q;
+      Q = malloc(sizeof(Queue));
+      if (Q == NULL) {
+          perror("create Queue failed!!!");
+      }
+      Q->Array = malloc(sizeof(ElementType)*MaxElements);
+      if (Q->Array == NULL) {
+          perror("create Array failed!!!");
+      }
+      Q->Capacity = MaxElements;
+      MakeEmpty(Q);
+      return Q;
+  }
+
+  void
+  DisposeQueue(Queue Q) {
+      free(Q->Array);
+      free(Q);
+  }
+
+  void
+  MakeEmpty(Queue Q) {
+      Q->Size = 0;
+      Q->Front = 1;
+      Q->Rear = 0;
+  }
+
+  static int
+  Succ(int Value, Queue Q) {
+      if (++Value == Q->Capacity) {
+          Value = 0;
+      }
+      return Value;
+  }
+
+  void
+  Enqueue(ElementType X, Queue Q) {
+      if (IsFull(Q)) {
+          perror("Full queue");
+      } else {
+          Q->Size++;
+          Q->Rear = Succ(Q->Rear, Q);
+          Q->Array[Q->Rear] = X;
+      }
+  }
+
+  ElementType
+  Front(Queue Q) {
+      return Q->Array[Q->Front];
+  }
+
+  void
+  Dequeue(Queue Q) {
+      if (IsEmpty(Q)) {
+          perror("Empty Queue!!!");
+      }
+      Q->Size--;
+      Q->Front = Succ(Q->Front, Q);
+  }
+
+  ElementType
+  FrontAndDequeue(Queue Q) {
+      if (IsEmpty(Q)) {
+          perror("Empty Queue!!!");
+      }
+      Q->Size--;
+      ElementType res = Q->Array[Q->Front];
+      Q->Front = Succ( Q->Front, Q );
+      return res;
+  }
+
+
+#+END_SRC
+
+*** 链表实现方式
+- queuewithlist.h
+#+BEGIN_SRC c
+  #ifndef _QUEUEWITHLIST_H
+  #define _QUEUEWITHLIST_H
+
+  struct Queue;
+  struct Node;
+  typedef struct Node* Pnode;
+  typedef struct QueueRecord *Queue;
+  typedef int ElementType;
+
+  int IsEmpty(Queue Q);
+  Queue CreateQueue();
+  void DisposeQueue(Queue Q);
+  void Enqueue(ElementType X, Queue Q);
+  ElementType Front(Queue Q);
+  void Dequeue(Queue Q);
+  ElementType FrontAndDequeue(Queue Q);
+
+  struct QueueRecord {
+      Pnode Front;
+      Pnode Rear;
+      int Size;
+  };
+
+  struct Node {
+      ElementType Element;
+      struct Node *Next;
+  };
+
+  #endif
+#+END_SRC
+- queuewithlist.c
+#+BEGIN_SRC c
+  #include "queuewithlist.h"
+  #include <stdio.h>
+  #include <stdlib.h>
+
+
+  int
+  IsEmpty(Queue Q) {
+      return Q->Size == 0;
+  }
+
+  Queue
+  CreateQueue() {
+      Queue Q;
+      Q = malloc(sizeof(struct QueueRecord));
+      if (Q == NULL) {
+          perror("create queue fail!!!");
+      }
+      Q->Size = 0;
+      Q->Front = malloc(sizeof(struct Node));
+      if (Q->Front == NULL) {
+          printf("create front fail");
+          exit(-1);
+      }
+      Q->Rear = Q->Front;
+      Q->Front->Next = NULL;
+      printf("创建队列成功\n");
+      return Q;
+  }
+
+  void
+  DisposeQueue(Queue Q) {
+      Pnode n = Q->Front;
+      Pnode tmp = n;
+      while (n != NULL) {
+          tmp = n->Next;
+          free(n);
+          n = tmp;
+      }
+      free(Q);
+      printf("销毁队列成功\n");
+  }
+
+
+  void
+  Enqueue(ElementType X, Queue Q) {
+      Pnode P;
+      P = malloc(sizeof(struct Node));
+      if (P == NULL) {
+          printf("create node fail");
+          exit(-1);
+      }
+      P->Element = X;
+      P->Next = Q->Rear->Next;
+      Q->Rear->Next = P;
+      Q->Rear = Q->Rear->Next;
+      Q->Size++;
+  }
+
+  void
+  Dequeue(Queue Q) {
+      if (IsEmpty(Q)) {
+          printf("Empty Queue!!!");
+          exit(-1);
+      }
+      Q->Front = Q->Front->Next;
+      Q->Size--;
+  }
+
+  ElementType
+  FrontAndDequeue(Queue Q) {
+      if (IsEmpty(Q)) {
+          printf("Empty Queue!!!");
+          exit(-1);
+      }
+      ElementType res = Q->Front->Element;
+      Q->Front = Q->Front->Next;
+      Q->Size--;
+      return res;
+  }
+#+END_SRC
