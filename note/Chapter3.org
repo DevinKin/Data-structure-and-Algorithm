@@ -522,7 +522,7 @@
   - 指针实现
   - 数组实现
     
-**** 指针实现
+*** 指针实现
 #+BEGIN_SRC c 
   #ifndef _STACK_H
   #define _STACK_H
@@ -623,7 +623,7 @@
       free(S);
   }
 #+END_SRC
-**** 数组实现
+*** 数组实现
 #+BEGIN_SRC c 
   #ifndef _STACKWITHARRAY_H
   #define _STACKWITHARRAY_H
