@@ -1,0 +1,19 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/5a2b65f8/
+Delete	BinarySortTree.c	/^Delete(int X, SearchTree T) {$/;"	f	typeref:typename:SearchTree
+Element	BinarySortTree.c	/^    int Element;$/;"	m	struct:TreeNode	typeref:typename:int	file:
+Find	BinarySortTree.c	/^Find(ElementType X, SearchTree T) {$/;"	f	typeref:typename:Position
+FindMax	BinarySortTree.c	/^FindMax(SearchTree T) {$/;"	f	typeref:typename:Position
+FindMin	BinarySortTree.c	/^FindMin(SearchTree T) {$/;"	f	typeref:typename:Position
+Insert	BinarySortTree.c	/^Insert(int X, SearchTree T) {$/;"	f	typeref:typename:SearchTree
+Left	BinarySortTree.c	/^    SearchTree Left;$/;"	m	struct:TreeNode	typeref:typename:SearchTree	file:
+MakeEmpty	BinarySortTree.c	/^MakeEmpty(SearchTree T) {$/;"	f	typeref:typename:SearchTree
+Position	BinarySortTree.h	/^typedef struct TreeNode *Position;$/;"	t	typeref:struct:TreeNode *
+Right	BinarySortTree.c	/^    SearchTree Right;$/;"	m	struct:TreeNode	typeref:typename:SearchTree	file:
+SearchTree	BinarySortTree.h	/^typedef struct TreeNode *SearchTree;$/;"	t	typeref:struct:TreeNode *
+TreeNode	BinarySortTree.c	/^struct TreeNode$/;"	s	file:
