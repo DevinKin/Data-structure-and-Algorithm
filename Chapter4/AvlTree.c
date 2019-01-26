@@ -205,6 +205,22 @@ MakeEmpty(AvlTree T) {
     return NULL;
 }
 
+static
+void PrintElement(int Element) {
+    printf("%d\t", Element);
+}
+
+static void
+PrintTree(AvlTree T) {
+    if (T != NULL) {
+        PrintTree(T->Left);
+        PrintElement(T->Element);
+        PrintTree(T->Right);
+    }
+}
+
+
+
 
 int main(int argc, char **argv) {
     int arr[] = {2,3,6,4,5,8,7,9,10,1,11,12,13,14,15,16,17};
@@ -212,6 +228,8 @@ int main(int argc, char **argv) {
     for(size_t i = 0; i < 17; i++) {
         T = Insert(arr[i], T);
     }
+    PrintTree(T);
+    printf("\n");
     Position min = FindMin(T);
     Position max = FindMax(T);
     Position find_3 = Find(3, T);
@@ -231,5 +249,7 @@ int main(int argc, char **argv) {
     } else {
         printf("yes\n");
     }
+    PrintTree(T);
+    printf("\n");
     return 0;
 }
