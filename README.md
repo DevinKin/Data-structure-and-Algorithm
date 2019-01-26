@@ -4,3 +4,5 @@
 ## [第三章-表、栈和队列](../note/Chapter3.org)
 
 ## [第四章-树](../note/Chapter4.md)
+
+## [第五章-散列](./note/Chapter5.md)
